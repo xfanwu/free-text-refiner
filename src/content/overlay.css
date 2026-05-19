@@ -11,12 +11,12 @@
 .tr-card {
   font-family: inherit;
   background: #141425;
-  border: 1px solid rgba(232, 168, 64, 0.15);
+  border: 1px solid rgba(217, 70, 239, 0.15);
   border-radius: 10px;
   box-shadow:
     0 8px 40px rgba(0, 0, 0, 0.4),
-    0 0 0 1px rgba(232, 168, 64, 0.06),
-    0 0 60px rgba(232, 168, 64, 0.04);
+    0 0 0 1px rgba(217, 70, 239, 0.06),
+    0 0 60px rgba(217, 70, 239, 0.05);
   width: 380px;
   max-height: 480px;
   overflow: hidden;
@@ -61,8 +61,8 @@
 .tr-spinner {
   width: 18px;
   height: 18px;
-  border: 2px solid rgba(232, 168, 64, 0.12);
-  border-top-color: #e8a840;
+  border: 2px solid rgba(217, 70, 239, 0.12);
+  border-top-color: #d946ef;
   border-radius: 50%;
   animation: tr-spin 0.7s linear infinite;
 }
@@ -82,7 +82,7 @@
   max-height: 360px;
   padding: 14px 16px;
   border: none;
-  border-bottom: 1px solid rgba(232, 168, 64, 0.08);
+  border-bottom: 1px solid rgba(217, 70, 239, 0.08);
   font-family: Georgia, 'Times New Roman', Charter, serif;
   font-size: 14px;
   line-height: 1.7;
@@ -109,7 +109,7 @@
 
 .tr-btn {
   padding: 6px 14px;
-  border: 1px solid rgba(232, 168, 64, 0.12);
+  border: 1px solid rgba(217, 70, 239, 0.12);
   border-radius: 6px;
   background: transparent;
   color: #8a8478;
@@ -122,9 +122,9 @@
 }
 
 .tr-btn:hover {
-  border-color: rgba(232, 168, 64, 0.3);
-  color: #e8a840;
-  background: rgba(232, 168, 64, 0.06);
+  border-color: rgba(217, 70, 239, 0.3);
+  color: #d946ef;
+  background: rgba(217, 70, 239, 0.06);
 }
 
 .tr-btn-close {
@@ -142,47 +142,47 @@
 }
 
 .tr-btn-primary {
-  background: #e8a840;
+  background: linear-gradient(135deg, #c084fc, #e879f9);
   color: #0b0b14;
-  border-color: #e8a840;
+  border-color: #d946ef;
 }
 
 .tr-btn-primary:hover {
-  background: #f0b850;
-  border-color: #f0b850;
+  background: linear-gradient(135deg, #d4a0ff, #f09eff);
+  border-color: #e879f9;
   color: #0b0b14;
 }
 
 .tr-btn-copy:active {
-  background: rgba(232, 168, 64, 0.12);
+  background: rgba(217, 70, 239, 0.12);
 }
 
 @media (prefers-color-scheme: light) {
   .tr-card {
     background: #fafaf6;
-    border-color: rgba(200, 170, 100, 0.2);
+    border-color: rgba(192, 132, 252, 0.15);
     box-shadow:
       0 8px 40px rgba(0, 0, 0, 0.08),
-      0 0 0 1px rgba(200, 170, 100, 0.08),
-      0 0 60px rgba(200, 170, 100, 0.03);
+      0 0 0 1px rgba(192, 132, 252, 0.06),
+      0 0 60px rgba(192, 132, 252, 0.04);
     color: #1a1a2e;
   }
 
   .tr-textarea {
-    background: #f5f4ed;
+    background: #f8f6fc;
     color: #1a1a2e;
-    border-bottom-color: rgba(200, 170, 100, 0.12);
+    border-bottom-color: rgba(192, 132, 252, 0.1);
   }
 
   .tr-btn {
-    border-color: rgba(180, 150, 90, 0.15);
+    border-color: rgba(192, 132, 252, 0.15);
     color: #6b6558;
   }
 
   .tr-btn:hover {
-    border-color: rgba(200, 170, 100, 0.4);
-    color: #b08520;
-    background: rgba(200, 170, 100, 0.06);
+    border-color: rgba(192, 132, 252, 0.4);
+    color: #c026d3;
+    background: rgba(192, 132, 252, 0.06);
   }
 
   .tr-btn-close {
@@ -198,7 +198,7 @@
   }
 
   .tr-spinner {
-    border-color: rgba(200, 170, 100, 0.15);
-    border-top-color: #c8a450;
+    border-color: rgba(192, 132, 252, 0.15);
+    border-top-color: #c084fc;
   }
 }

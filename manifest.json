@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
-  "name": "Text Refine",
+  "name": "Free Text Refiner",
   "version": "0.1.0",
-  "description": "Refine selected text via LLM with right-click context menu.",
+  "description": "Free text refinement via LLM — select, click, refine.",
   "permissions": ["contextMenus", "storage", "activeTab", "scripting"],
   "host_permissions": ["https://*/*", "http://*/*"],
   "background": {

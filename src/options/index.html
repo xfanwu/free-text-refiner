@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Text Refine Settings</title>
+  <title>Free Text Refiner Settings</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
@@ -15,10 +15,10 @@
       --text: #e8e3d8;
       --text-muted: #8a8478;
       --text-dim: #5a5650;
-      --accent: #e8a840;
-      --accent-glow: rgba(232, 168, 64, 0.15);
+      --accent: #d946ef;
+      --accent-glow: rgba(217, 70, 239, 0.15);
       --border: #2a2a3e;
-      --border-focus: rgba(232, 168, 64, 0.4);
+      --border-focus: rgba(217, 70, 239, 0.4);
       --success: #6fb06f;
       --error: #f4a0a0;
       --radius: 10px;
@@ -34,8 +34,8 @@
       color: var(--text);
       background: var(--bg);
       background-image:
-        radial-gradient(ellipse 60% 40% at 50% 0%, rgba(232, 168, 64, 0.03) 0%, transparent 60%),
-        radial-gradient(ellipse 30% 20% at 80% 100%, rgba(120, 100, 200, 0.03) 0%, transparent 60%);
+        radial-gradient(ellipse 60% 40% at 50% 0%, rgba(217, 70, 239, 0.04) 0%, transparent 60%),
+        radial-gradient(ellipse 30% 20% at 80% 100%, rgba(192, 132, 252, 0.04) 0%, transparent 60%);
       min-height: 100vh;
       display: flex;
       align-items: center;
@@ -136,7 +136,7 @@
 
     button {
       padding: 9px 24px;
-      background: var(--accent);
+      background: linear-gradient(135deg, #c084fc, #e879f9);
       color: #0b0b14;
       border: none;
       border-radius: var(--radius-sm);
@@ -149,8 +149,8 @@
     }
 
     button:hover {
-      background: #f0b850;
-      box-shadow: 0 4px 16px rgba(232, 168, 64, 0.25);
+      background: linear-gradient(135deg, #d4a0ff, #f09eff);
+      box-shadow: 0 4px 16px rgba(217, 70, 239, 0.3);
     }
 
     #status {
@@ -167,7 +167,7 @@
 </head>
 <body>
   <div class="card">
-    <h1>Text <span>Refine</span> Settings</h1>
+    <h1>Free Text <span>Refiner</span> Settings</h1>
     <form id="settings-form">
       <div class="form-group">
         <label for="baseUrl">API Base URL</label>
