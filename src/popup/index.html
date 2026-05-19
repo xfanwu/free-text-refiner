@@ -4,202 +4,313 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Text Refine</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=Source+Serif+4:opsz@8..60&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body {
-      width: 400px;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-      font-size: 14px;
-      color: #1a1a2e;
-      background: #ffffff;
+    :root {
+      --bg: #0b0b14;
+      --bg-surface: #141425;
+      --bg-elevated: #1c1c33;
+      --bg-input: #111122;
+      --text: #e8e3d8;
+      --text-muted: #8a8478;
+      --text-dim: #5a5650;
+      --accent: #e8a840;
+      --accent-glow: rgba(232, 168, 64, 0.15);
+      --border: #2a2a3e;
+      --border-focus: rgba(232, 168, 64, 0.4);
+      --error-bg: #2d1a1a;
+      --error-text: #f4a0a0;
+      --radius: 10px;
+      --radius-sm: 6px;
+      --transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      width: 420px;
+      font-family: 'IBM Plex Sans', system-ui, sans-serif;
+      font-size: 14px;
+      color: var(--text);
+      background: var(--bg);
+      background-image:
+        radial-gradient(ellipse 80% 50% at 50% 0%, rgba(232, 168, 64, 0.03) 0%, transparent 60%),
+        radial-gradient(ellipse 40% 30% at 80% 100%, rgba(120, 100, 200, 0.04) 0%, transparent 60%);
+      overflow: hidden;
+    }
+
+    /* Noise texture overlay */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      opacity: 0.03;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+      pointer-events: none;
+    }
+
     .container {
-      padding: 16px;
+      position: relative;
+      padding: 20px 22px 22px;
       display: flex;
       flex-direction: column;
-      gap: 12px;
+      gap: 14px;
     }
+
     .header {
       display: flex;
-      align-items: center;
+      align-items: baseline;
       justify-content: space-between;
     }
+
     .header h1 {
-      font-size: 15px;
+      font-family: 'Playfair Display', Georgia, serif;
+      font-size: 22px;
       font-weight: 600;
+      color: var(--text);
+      letter-spacing: -0.3px;
     }
-    .header a {
+
+    .header h1 span {
+      color: var(--accent);
+      font-style: italic;
+    }
+
+    .settings-link {
       font-size: 12px;
-      color: #3b82f6;
+      color: var(--text-dim);
       text-decoration: none;
+      font-family: 'IBM Plex Sans', system-ui, sans-serif;
+      font-weight: 500;
+      transition: color var(--transition);
+      padding: 2px 8px;
+      border-radius: var(--radius-sm);
     }
-    .header a:hover {
-      text-decoration: underline;
+
+    .settings-link:hover {
+      color: var(--accent);
+      background: rgba(232, 168, 64, 0.06);
     }
+
+    .input-wrapper {
+      position: relative;
+    }
+
     textarea {
       width: 100%;
-      min-height: 100px;
-      padding: 10px 12px;
-      border: 1px solid #d1d5db;
-      border-radius: 8px;
-      font-family: inherit;
-      font-size: 14px;
-      line-height: 1.6;
-      color: #1a1a2e;
+      min-height: 110px;
+      padding: 14px 16px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--bg-input);
+      color: var(--text);
+      font-family: 'Source Serif 4', Georgia, 'Times New Roman', serif;
+      font-size: 15px;
+      line-height: 1.65;
       resize: vertical;
       outline: none;
-      transition: border-color 0.15s;
+      transition: border-color var(--transition), box-shadow var(--transition);
     }
+
+    textarea::placeholder {
+      color: var(--text-dim);
+      font-family: 'IBM Plex Sans', system-ui, sans-serif;
+      font-size: 13px;
+    }
+
     textarea:focus {
-      border-color: #3b82f6;
-      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.12);
+      border-color: var(--border-focus);
+      box-shadow: 0 0 0 3px var(--accent-glow), 0 0 20px var(--accent-glow);
     }
+
+    .char-count {
+      position: absolute;
+      bottom: 10px;
+      right: 14px;
+      font-size: 10px;
+      color: var(--text-dim);
+      font-weight: 500;
+      letter-spacing: 0.5px;
+      pointer-events: none;
+    }
+
     button.primary {
       width: 100%;
-      padding: 10px 0;
+      padding: 11px 0;
       border: none;
-      border-radius: 8px;
-      background: #3b82f6;
-      color: #ffffff;
-      font-family: inherit;
+      border-radius: var(--radius);
+      background: var(--accent);
+      color: #0b0b14;
+      font-family: 'IBM Plex Sans', system-ui, sans-serif;
       font-size: 14px;
       font-weight: 600;
+      letter-spacing: 0.3px;
       cursor: pointer;
-      transition: background 0.15s;
+      transition: background var(--transition), box-shadow var(--transition), transform var(--transition);
+      position: relative;
+      overflow: hidden;
     }
+
     button.primary:hover {
-      background: #2563eb;
+      background: #f0b850;
+      box-shadow: 0 4px 24px rgba(232, 168, 64, 0.3);
+      transform: translateY(-1px);
     }
+
+    button.primary:active {
+      transform: translateY(0);
+    }
+
     button.primary:disabled {
-      background: #93c5fd;
+      background: #4a4a30;
+      color: #888;
       cursor: not-allowed;
+      box-shadow: none;
+      transform: none;
     }
+
     .spinner {
       display: inline-block;
-      width: 14px;
-      height: 14px;
-      border: 2px solid rgba(255,255,255,0.3);
-      border-top-color: #ffffff;
+      width: 15px;
+      height: 15px;
+      border: 2px solid rgba(11, 11, 20, 0.2);
+      border-top-color: #0b0b14;
       border-radius: 50%;
-      animation: spin 0.5s linear infinite;
-      margin-right: 6px;
+      animation: spin 0.6s linear infinite;
+      margin-right: 8px;
       vertical-align: middle;
     }
+
     @keyframes spin {
       to { transform: rotate(360deg); }
     }
-    .result {
-      display: none;
-      flex-direction: column;
-      gap: 8px;
-    }
-    .result.visible {
-      display: flex;
-    }
-    .result-label {
-      font-size: 12px;
-      font-weight: 600;
-      color: #6b7280;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
-    .result-box {
-      padding: 10px 12px;
-      background: #f3f4f6;
-      border: 1px solid #e5e7eb;
-      border-radius: 8px;
-      line-height: 1.6;
-      white-space: pre-wrap;
-      word-break: break-word;
-      max-height: 240px;
-      overflow-y: auto;
-    }
-    .result-actions {
-      display: flex;
-      gap: 8px;
-    }
-    .btn-sm {
-      padding: 6px 14px;
-      border: 1px solid #d1d5db;
-      border-radius: 6px;
-      background: #ffffff;
-      color: #374151;
-      font-family: inherit;
-      font-size: 12px;
-      font-weight: 500;
-      cursor: pointer;
-      transition: background 0.15s;
-    }
-    .btn-sm:hover {
-      background: #f3f4f6;
-    }
-    .btn-sm:active {
-      background: #e5e7eb;
-    }
+
     .error {
       display: none;
-      padding: 10px 12px;
-      background: #fef2f2;
-      border: 1px solid #fecaca;
-      border-radius: 8px;
-      color: #dc2626;
-      font-size: 13px;
+      padding: 10px 14px;
+      background: var(--error-bg);
+      border: 1px solid rgba(244, 160, 160, 0.2);
+      border-radius: var(--radius);
+      color: var(--error-text);
+      font-size: 12px;
       line-height: 1.5;
+      animation: fadeIn 0.2s ease;
     }
+
     .error.visible {
       display: block;
     }
 
-    @media (prefers-color-scheme: dark) {
-      body {
-        background: #1e1e2e;
-        color: #e4e4e7;
+    .result {
+      display: none;
+      flex-direction: column;
+      gap: 10px;
+      animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .result.visible {
+      display: flex;
+    }
+
+    @keyframes slideUp {
+      from {
+        opacity: 0;
+        transform: translateY(8px);
       }
-      textarea {
-        background: #16162a;
-        border-color: #3b3b4d;
-        color: #e4e4e7;
+      to {
+        opacity: 1;
+        transform: translateY(0);
       }
-      textarea:focus {
-        border-color: #3b82f6;
-      }
-      .result-box {
-        background: #16162a;
-        border-color: #3b3b4d;
-      }
-      .result-label {
-        color: #9ca3af;
-      }
-      .btn-sm {
-        background: #2a2a3c;
-        border-color: #3b3b4d;
-        color: #e4e4e7;
-      }
-      .btn-sm:hover {
-        background: #3b3b4d;
-      }
-      .error {
-        background: #2d1b1b;
-        border-color: #5c2a2a;
-        color: #fca5a5;
-      }
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    .result-divider {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .result-divider::before,
+    .result-divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: linear-gradient(to right, transparent, var(--border), transparent);
+    }
+
+    .result-divider span {
+      font-size: 10px;
+      font-weight: 600;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+    }
+
+    .result-box {
+      padding: 14px 16px;
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      font-family: 'Source Serif 4', Georgia, 'Times New Roman', serif;
+      font-size: 15px;
+      line-height: 1.7;
+      color: var(--text);
+      white-space: pre-wrap;
+      word-break: break-word;
+      max-height: 200px;
+      overflow-y: auto;
+    }
+
+    .result-actions {
+      display: flex;
+      gap: 8px;
+    }
+
+    .btn-secondary {
+      flex: 1;
+      padding: 8px 0;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      background: transparent;
+      color: var(--text-muted);
+      font-family: 'IBM Plex Sans', system-ui, sans-serif;
+      font-size: 12px;
+      font-weight: 500;
+      letter-spacing: 0.3px;
+      cursor: pointer;
+      transition: all var(--transition);
+    }
+
+    .btn-secondary:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+      background: var(--accent-glow);
     }
   </style>
 </head>
 <body>
   <div class="container">
     <div class="header">
-      <h1>Text Refine</h1>
-      <a href="#" id="open-settings">Settings</a>
+      <h1>Text <span>Refine</span></h1>
+      <a href="#" class="settings-link" id="open-settings">Settings</a>
     </div>
-    <textarea id="input-text" placeholder="Paste or type text to refine..."></textarea>
+    <div class="input-wrapper">
+      <textarea id="input-text" placeholder="Paste or type text to refine…" maxlength="8000"></textarea>
+      <span class="char-count"><span id="char-count">0</span> / 8000</span>
+    </div>
     <button class="primary" id="refine-btn">Refine</button>
     <div class="error" id="error-msg"></div>
     <div class="result" id="result-area">
-      <span class="result-label">Refined</span>
+      <div class="result-divider"><span>Refined</span></div>
       <div class="result-box" id="result-text"></div>
       <div class="result-actions">
-        <button class="btn-sm" id="copy-btn">Copy</button>
+        <button class="btn-secondary" id="copy-btn">Copy</button>
       </div>
     </div>
   </div>

@@ -18,8 +18,7 @@ async function load() {
 
 function showStatus(text, isError) {
   status.textContent = text;
-  status.classList.toggle('error', !!isError);
-  status.classList.add('visible');
+  status.className = 'visible ' + (isError ? 'error' : 'success');
   setTimeout(() => status.classList.remove('visible'), 2000);
 }
 

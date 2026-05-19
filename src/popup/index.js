@@ -78,4 +78,10 @@ openSettings.addEventListener('click', (e) => {
   chrome.runtime.openOptionsPage();
 });
 
+const charCount = document.getElementById('char-count');
+
+inputText.addEventListener('input', () => {
+  charCount.textContent = inputText.value.length;
+});
+
 inputText.focus();
