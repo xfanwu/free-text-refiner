@@ -3,7 +3,7 @@
   "name": "Text Refine",
   "version": "0.1.0",
   "description": "Refine selected text via LLM with right-click context menu.",
-  "permissions": ["contextMenus", "storage", "activeTab"],
+  "permissions": ["contextMenus", "storage", "activeTab", "scripting"],
   "host_permissions": ["https://*/*", "http://*/*"],
   "background": {
     "service_worker": "src/background/index.js",

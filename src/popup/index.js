@@ -8,6 +8,7 @@ const resultArea = document.getElementById('result-area');
 const resultText = document.getElementById('result-text');
 const copyBtn = document.getElementById('copy-btn');
 const openSettings = document.getElementById('open-settings');
+const charCount = document.getElementById('char-count');
 
 let lastResult = '';
 
@@ -32,10 +33,7 @@ function showResult() {
   resultArea.classList.add('visible');
 }
 
-refineBtn.addEventListener('click', async () => {
-  const text = inputText.value.trim();
-  if (!text) return;
-
+async function doRefine(text) {
   hideError();
   resultArea.classList.remove('visible');
   resultText.textContent = '';
@@ -65,6 +63,12 @@ refineBtn.addEventListener('click', async () => {
     showError(err.message);
     setLoading(false);
   }
+}
+
+refineBtn.addEventListener('click', () => {
+  const text = inputText.value.trim();
+  if (!text) return;
+  doRefine(text);
 });
 
 copyBtn.addEventListener('click', async () => {
@@ -78,10 +82,33 @@ openSettings.addEventListener('click', (e) => {
   chrome.runtime.openOptionsPage();
 });
 
-const charCount = document.getElementById('char-count');
-
 inputText.addEventListener('input', () => {
   charCount.textContent = inputText.value.length;
 });
 
-inputText.focus();
+async function init() {
+  const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+  if (!tab?.id) {
+    inputText.focus();
+    return;
+  }
+
+  try {
+    const [result] = await chrome.scripting.executeScript({
+      target: { tabId: tab.id },
+      func: () => window.getSelection()?.toString().trim() || '',
+    });
+    const selected = result?.result;
+    if (selected) {
+      inputText.value = selected;
+      inputText.dispatchEvent(new Event('input'));
+      doRefine(selected);
+    } else {
+      inputText.focus();
+    }
+  } catch {
+    inputText.focus();
+  }
+}
+
+init();
