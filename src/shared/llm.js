@@ -18,6 +18,7 @@ export async function* refineTextStream(text, settings) {
   const url = baseUrl.replace(/\/+$/, '') + '/chat/completions';
   const prompt = buildPrompt(text);
 
+  const tStart = performance.now();
   const response = await fetch(url, {
     method: 'POST',
     headers: {
@@ -41,6 +42,7 @@ export async function* refineTextStream(text, settings) {
   const reader = response.body.getReader();
   const decoder = new TextDecoder();
   let buffer = '';
+  let firstToken = false;
 
   while (true) {
     const { done, value } = await reader.read();
@@ -60,7 +62,13 @@ export async function* refineTextStream(text, settings) {
       try {
         const parsed = JSON.parse(data);
         const content = parsed.choices?.[0]?.delta?.content;
-        if (content) yield content;
+        if (content) {
+          if (!firstToken) {
+            firstToken = true;
+            console.log(`[TextRefine] First token: ${(performance.now() - tStart).toFixed(0)}ms`);
+          }
+          yield content;
+        }
       } catch {
         // Skip unparseable lines
       }
