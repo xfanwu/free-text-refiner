@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Text Refine Settings</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      font-size: 14px;
+      color: #1a1a2e;
+      background: #f5f5f7;
+      padding: 24px;
+      min-width: 360px;
+    }
+    h1 {
+      font-size: 18px;
+      font-weight: 600;
+      margin-bottom: 20px;
+    }
+    .form-group {
+      margin-bottom: 16px;
+    }
+    label {
+      display: block;
+      font-size: 13px;
+      font-weight: 500;
+      color: #374151;
+      margin-bottom: 6px;
+    }
+    input, select {
+      width: 100%;
+      padding: 8px 12px;
+      border: 1px solid #d1d5db;
+      border-radius: 6px;
+      font-family: inherit;
+      font-size: 14px;
+      color: #1a1a2e;
+      background: #ffffff;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+    input:focus, select:focus {
+      border-color: #3b82f6;
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+    }
+    .hint {
+      font-size: 12px;
+      color: #9ca3af;
+      margin-top: 4px;
+    }
+    button {
+      padding: 8px 20px;
+      background: #3b82f6;
+      color: #ffffff;
+      border: none;
+      border-radius: 6px;
+      font-family: inherit;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    button:hover {
+      background: #2563eb;
+    }
+    #status {
+      display: inline-block;
+      margin-left: 12px;
+      font-size: 13px;
+      color: #16a34a;
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+    #status.visible { opacity: 1; }
+    #status.error { color: #dc2626; }
+  </style>
+</head>
+<body>
+  <h1>Text Refine Settings</h1>
+  <form id="settings-form">
+    <div class="form-group">
+      <label for="baseUrl">API Base URL</label>
+      <input type="url" id="baseUrl" placeholder="https://api.openai.com/v1" autocomplete="off">
+      <div class="hint">OpenAI-compatible API endpoint.</div>
+    </div>
+    <div class="form-group">
+      <label for="apiKey">API Key</label>
+      <input type="password" id="apiKey" placeholder="sk-..." autocomplete="off">
+      <div class="hint">Your API key is stored locally and never sent elsewhere.</div>
+    </div>
+    <div class="form-group">
+      <label for="model">Model</label>
+      <input type="text" id="model" placeholder="gpt-3.5-turbo" autocomplete="off">
+      <div class="hint">Model name, e.g. gpt-4, gpt-3.5-turbo, claude-3-opus, etc.</div>
+    </div>
+    <button type="submit">Save</button>
+    <span id="status">Saved</span>
+  </form>
+  <script src="index.js" type="module"></script>
+</body>
+</html>

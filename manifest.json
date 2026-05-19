@@ -1,0 +1,29 @@
+{
+  "manifest_version": 3,
+  "name": "Text Refine",
+  "version": "0.1.0",
+  "description": "Refine selected text via LLM with right-click context menu.",
+  "permissions": ["contextMenus", "storage", "activeTab"],
+  "host_permissions": ["https://*/*", "http://*/*"],
+  "background": {
+    "service_worker": "src/background/index.js",
+    "type": "module"
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["src/content/index.js"],
+      "css": ["src/content/overlay.css"],
+      "run_at": "document_end"
+    }
+  ],
+  "options_ui": {
+    "page": "src/options/index.html",
+    "open_in_tab": false
+  },
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  }
+}
