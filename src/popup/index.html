@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Text Refine</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      width: 400px;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      font-size: 14px;
+      color: #1a1a2e;
+      background: #ffffff;
+    }
+    .container {
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .header h1 {
+      font-size: 15px;
+      font-weight: 600;
+    }
+    .header a {
+      font-size: 12px;
+      color: #3b82f6;
+      text-decoration: none;
+    }
+    .header a:hover {
+      text-decoration: underline;
+    }
+    textarea {
+      width: 100%;
+      min-height: 100px;
+      padding: 10px 12px;
+      border: 1px solid #d1d5db;
+      border-radius: 8px;
+      font-family: inherit;
+      font-size: 14px;
+      line-height: 1.6;
+      color: #1a1a2e;
+      resize: vertical;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+    textarea:focus {
+      border-color: #3b82f6;
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.12);
+    }
+    button.primary {
+      width: 100%;
+      padding: 10px 0;
+      border: none;
+      border-radius: 8px;
+      background: #3b82f6;
+      color: #ffffff;
+      font-family: inherit;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    button.primary:hover {
+      background: #2563eb;
+    }
+    button.primary:disabled {
+      background: #93c5fd;
+      cursor: not-allowed;
+    }
+    .spinner {
+      display: inline-block;
+      width: 14px;
+      height: 14px;
+      border: 2px solid rgba(255,255,255,0.3);
+      border-top-color: #ffffff;
+      border-radius: 50%;
+      animation: spin 0.5s linear infinite;
+      margin-right: 6px;
+      vertical-align: middle;
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    .result {
+      display: none;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .result.visible {
+      display: flex;
+    }
+    .result-label {
+      font-size: 12px;
+      font-weight: 600;
+      color: #6b7280;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .result-box {
+      padding: 10px 12px;
+      background: #f3f4f6;
+      border: 1px solid #e5e7eb;
+      border-radius: 8px;
+      line-height: 1.6;
+      white-space: pre-wrap;
+      word-break: break-word;
+      max-height: 240px;
+      overflow-y: auto;
+    }
+    .result-actions {
+      display: flex;
+      gap: 8px;
+    }
+    .btn-sm {
+      padding: 6px 14px;
+      border: 1px solid #d1d5db;
+      border-radius: 6px;
+      background: #ffffff;
+      color: #374151;
+      font-family: inherit;
+      font-size: 12px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    .btn-sm:hover {
+      background: #f3f4f6;
+    }
+    .btn-sm:active {
+      background: #e5e7eb;
+    }
+    .error {
+      display: none;
+      padding: 10px 12px;
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      border-radius: 8px;
+      color: #dc2626;
+      font-size: 13px;
+      line-height: 1.5;
+    }
+    .error.visible {
+      display: block;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      body {
+        background: #1e1e2e;
+        color: #e4e4e7;
+      }
+      textarea {
+        background: #16162a;
+        border-color: #3b3b4d;
+        color: #e4e4e7;
+      }
+      textarea:focus {
+        border-color: #3b82f6;
+      }
+      .result-box {
+        background: #16162a;
+        border-color: #3b3b4d;
+      }
+      .result-label {
+        color: #9ca3af;
+      }
+      .btn-sm {
+        background: #2a2a3c;
+        border-color: #3b3b4d;
+        color: #e4e4e7;
+      }
+      .btn-sm:hover {
+        background: #3b3b4d;
+      }
+      .error {
+        background: #2d1b1b;
+        border-color: #5c2a2a;
+        color: #fca5a5;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>Text Refine</h1>
+      <a href="#" id="open-settings">Settings</a>
+    </div>
+    <textarea id="input-text" placeholder="Paste or type text to refine..."></textarea>
+    <button class="primary" id="refine-btn">Refine</button>
+    <div class="error" id="error-msg"></div>
+    <div class="result" id="result-area">
+      <span class="result-label">Refined</span>
+      <div class="result-box" id="result-text"></div>
+      <div class="result-actions">
+        <button class="btn-sm" id="copy-btn">Copy</button>
+      </div>
+    </div>
+  </div>
+  <script src="index.js" type="module"></script>
+</body>
+</html>
