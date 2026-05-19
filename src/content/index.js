@@ -3,15 +3,34 @@ let overlayEl = null;
 let originalText = '';
 let originalActiveElement = null;
 let refinedText = '';
+let selectionRAF = null;
+let _selEventCount = 0;
+let _selRAFCount = 0;
+let _perfReported = false;
 
 function trackSelection() {
-  const sel = window.getSelection();
-  if (!sel || sel.isCollapsed || !sel.rangeCount) {
-    lastSelectionRect = null;
-    return;
+  if (overlayEl) return;
+
+  _selEventCount++;
+  if (!_perfReported && _selEventCount >= 500) {
+    _perfReported = true;
+    console.debug(`[TextRefine] selectionchange fired ${_selEventCount}x, getBoundingClientRect called ${_selRAFCount}x (${((1 - _selRAFCount / _selEventCount) * 100).toFixed(0)}% dropped by rAF)`);
   }
-  const range = sel.getRangeAt(0);
-  lastSelectionRect = range.getBoundingClientRect();
+
+  if (selectionRAF) return;
+  selectionRAF = requestAnimationFrame(() => {
+    selectionRAF = null;
+    _selRAFCount++;
+    const sel = window.getSelection();
+    if (!sel || sel.isCollapsed || !sel.rangeCount) {
+      lastSelectionRect = null;
+      return;
+    }
+    lastSelectionRect = sel.getRangeAt(0).getBoundingClientRect();
+  });
+}
+    lastSelectionRect = sel.getRangeAt(0).getBoundingClientRect();
+  });
 }
 
 document.addEventListener('mouseup', trackSelection);
