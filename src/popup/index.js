@@ -1,5 +1,5 @@
 import { getSettings } from '../shared/storage.js';
-import { refineText } from '../shared/llm.js';
+import { refineTextStream } from '../shared/llm.js';
 
 const inputText = document.getElementById('input-text');
 const refineBtn = document.getElementById('refine-btn');
@@ -28,9 +28,7 @@ function hideError() {
   errorMsg.classList.remove('visible');
 }
 
-function showResult(text) {
-  lastResult = text;
-  resultText.textContent = text;
+function showResult() {
   resultArea.classList.add('visible');
 }
 
@@ -40,15 +38,31 @@ refineBtn.addEventListener('click', async () => {
 
   hideError();
   resultArea.classList.remove('visible');
+  resultText.textContent = '';
   setLoading(true);
 
   try {
     const settings = await getSettings();
-    const refined = await refineText(text, settings);
-    showResult(refined);
+    const stream = refineTextStream(text, settings);
+
+    let firstChunk = true;
+    let result = '';
+    for await (const chunk of stream) {
+      result += chunk;
+      resultText.textContent = result;
+      if (firstChunk) {
+        firstChunk = false;
+        setLoading(false);
+        showResult();
+      }
+    }
+    lastResult = result;
+    setLoading(false);
+    if (!result) {
+      showError('No response from LLM.');
+    }
   } catch (err) {
     showError(err.message);
-  } finally {
     setLoading(false);
   }
 });
@@ -64,5 +78,4 @@ openSettings.addEventListener('click', (e) => {
   chrome.runtime.openOptionsPage();
 });
 
-// Auto-focus textarea
 inputText.focus();

@@ -2,6 +2,7 @@ let lastSelectionRect = null;
 let overlayEl = null;
 let originalText = '';
 let originalActiveElement = null;
+let refinedText = '';
 
 function trackSelection() {
   const sel = window.getSelection();
@@ -94,31 +95,39 @@ function showOverlay(text) {
   });
 }
 
-function showResult(text) {
+function showFirstChunk(chunk) {
   if (!overlayEl) return;
   const loading = overlayEl.querySelector('.tr-loading');
   const result = overlayEl.querySelector('.tr-result');
   const textarea = result.querySelector('.tr-textarea');
 
+  refinedText = chunk;
   loading.style.display = 'none';
   result.style.display = 'flex';
-  textarea.value = text;
-
-  // Auto-adjust height
+  textarea.value = chunk;
   textarea.style.height = 'auto';
   textarea.style.height = Math.min(textarea.scrollHeight, 360) + 'px';
 
   result.querySelector('.tr-btn-copy').addEventListener('click', async () => {
-    await navigator.clipboard.writeText(text);
+    await navigator.clipboard.writeText(refinedText);
     const btn = result.querySelector('.tr-btn-copy');
     btn.textContent = 'Copied!';
     setTimeout(() => { btn.textContent = 'Copy'; }, 1500);
   });
 
   result.querySelector('.tr-btn-apply').addEventListener('click', () => {
-    applyText(text);
+    applyText(refinedText);
     removeOverlay();
   });
+}
+
+function appendChunk(chunk) {
+  if (!overlayEl) return;
+  refinedText += chunk;
+  const textarea = overlayEl.querySelector('.tr-textarea');
+  textarea.value = refinedText;
+  textarea.style.height = 'auto';
+  textarea.style.height = Math.min(textarea.scrollHeight, 360) + 'px';
 }
 
 function showError(error) {
@@ -167,10 +176,16 @@ function applyText(text) {
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   switch (message.action) {
     case 'showOverlay':
+      refinedText = '';
       showOverlay(message.text);
       break;
-    case 'refineResult':
-      showResult(message.text);
+    case 'refineFirstChunk':
+      showFirstChunk(message.text);
+      break;
+    case 'refineChunk':
+      appendChunk(message.text);
+      break;
+    case 'refineDone':
       break;
     case 'refineError':
       showError(message.error);

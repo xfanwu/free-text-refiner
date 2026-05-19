@@ -1,5 +1,5 @@
 import { getSettings } from '../shared/storage.js';
-import { refineText } from '../shared/llm.js';
+import { refineTextStream } from '../shared/llm.js';
 
 chrome.runtime.onInstalled.addListener(() => {
   chrome.contextMenus.create({
@@ -23,8 +23,17 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
 
   try {
     const settings = await getSettings();
-    const refined = await refineText(text, settings);
-    await chrome.tabs.sendMessage(tab.id, { action: 'refineResult', text: refined });
+    const stream = refineTextStream(text, settings);
+
+    let firstChunk = true;
+    for await (const chunk of stream) {
+      await chrome.tabs.sendMessage(tab.id, {
+        action: firstChunk ? 'refineFirstChunk' : 'refineChunk',
+        text: chunk,
+      });
+      firstChunk = false;
+    }
+    await chrome.tabs.sendMessage(tab.id, { action: 'refineDone' });
   } catch (err) {
     await chrome.tabs.sendMessage(tab.id, { action: 'refineError', error: err.message });
   }
