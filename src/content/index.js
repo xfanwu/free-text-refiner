@@ -29,9 +29,6 @@ function trackSelection() {
     lastSelectionRect = sel.getRangeAt(0).getBoundingClientRect();
   });
 }
-    lastSelectionRect = sel.getRangeAt(0).getBoundingClientRect();
-  });
-}
 
 document.addEventListener('mouseup', trackSelection);
 document.addEventListener('selectionchange', trackSelection);
