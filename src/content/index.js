@@ -4,6 +4,7 @@ let originalText = '';
 let originalActiveElement = null;
 let refinedText = '';
 let selectionRAF = null;
+let lastMousePos = null;
 let _selEventCount = 0;
 let _selRAFCount = 0;
 let _perfReported = false;
@@ -32,6 +33,9 @@ function trackSelection() {
 
 document.addEventListener('mouseup', trackSelection);
 document.addEventListener('selectionchange', trackSelection);
+document.addEventListener('contextmenu', (e) => {
+  lastMousePos = { x: e.clientX, y: e.clientY };
+});
 
 function removeOverlay() {
   if (overlayEl) {
@@ -42,8 +46,18 @@ function removeOverlay() {
 }
 
 function positionCard(card) {
-  const rect = lastSelectionRect;
-  if (!rect) {
+  const cardWidth = 380;
+  const gap = 10;
+  const vw = window.innerWidth;
+  const vh = window.innerHeight;
+
+  let origin; // { x, y } in viewport coords
+  if (lastMousePos) {
+    origin = lastMousePos;
+    lastMousePos = null;
+  } else if (lastSelectionRect) {
+    origin = { x: lastSelectionRect.left, y: lastSelectionRect.bottom };
+  } else {
     card.style.position = 'fixed';
     card.style.top = '50%';
     card.style.left = '50%';
@@ -51,23 +65,17 @@ function positionCard(card) {
     return;
   }
 
-  card.style.position = 'fixed';
-  const gap = 10;
-  const cardWidth = 380;
-  let top = rect.bottom + gap;
-  let left = rect.left;
+  let top = origin.y + gap;
+  let left = origin.x;
 
-  const vw = window.innerWidth;
-  const vh = window.innerHeight;
-
+  // Flip above if below viewport
   if (top + 200 > vh) {
-    top = rect.top - 200 - gap;
+    top = origin.y - 200 - gap;
   }
-  if (left + cardWidth > vw - 8) {
-    left = vw - cardWidth - 8;
-  }
+  if (left + cardWidth > vw - 8) left = vw - cardWidth - 8;
   if (left < 8) left = 8;
 
+  card.style.position = 'fixed';
   card.style.top = Math.max(0, top) + 'px';
   card.style.left = left + 'px';
   card.style.transform = 'none';
