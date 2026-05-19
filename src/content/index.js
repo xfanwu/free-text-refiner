@@ -78,6 +78,12 @@ function showOverlay(text) {
   originalText = text;
   originalActiveElement = document.activeElement;
 
+  // Capture selection position fresh — it's still active when context menu item is clicked
+  const sel = window.getSelection();
+  if (sel && !sel.isCollapsed && sel.rangeCount) {
+    lastSelectionRect = sel.getRangeAt(0).getBoundingClientRect();
+  }
+
   overlayEl = document.createElement('div');
   overlayEl.id = 'text-refine-overlay';
   overlayEl.innerHTML = `
