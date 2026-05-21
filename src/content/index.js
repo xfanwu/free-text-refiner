@@ -51,7 +51,7 @@ function positionCard(card) {
   const vw = window.innerWidth;
   const vh = window.innerHeight;
 
-  let origin; // { x, y } in viewport coords
+  let origin;
   if (lastMousePos) {
     origin = lastMousePos;
     lastMousePos = null;
@@ -68,7 +68,6 @@ function positionCard(card) {
   let top = origin.y + gap;
   let left = origin.x;
 
-  // Flip above if below viewport
   if (top + 200 > vh) {
     top = origin.y - 200 - gap;
   }
@@ -86,7 +85,6 @@ function showOverlay(text) {
   originalText = text;
   originalActiveElement = document.activeElement;
 
-  // Capture selection position fresh — it's still active when context menu item is clicked
   const sel = window.getSelection();
   if (sel && !sel.isCollapsed && sel.rangeCount) {
     lastSelectionRect = sel.getRangeAt(0).getBoundingClientRect();
@@ -190,7 +188,6 @@ function applyText(text) {
     document.execCommand('selectAll', false);
     document.execCommand('insertText', false, text);
   } else {
-    // Try to find a contenteditable ancestor
     let node = el;
     while (node) {
       if (node.isContentEditable) {
@@ -203,23 +200,150 @@ function applyText(text) {
   }
 }
 
+// --- Inlined shared utilities ---
+
+const DEFAULT_SETTINGS = {
+  baseUrl: 'https://api.openai.com/v1',
+  apiKey: '',
+  model: 'gpt-3.5-turbo',
+};
+
+function getSettings() {
+  return new Promise((resolve) => {
+    chrome.storage.sync.get(DEFAULT_SETTINGS, (result) => {
+      resolve({ ...DEFAULT_SETTINGS, ...result });
+    });
+  });
+}
+
+function buildPrompt(text) {
+  return `Refine the following text: fix grammar, improve clarity and style, preserve meaning. Output in the same language as the input.\n\n${text}`;
+}
+
+async function* refineTextStream(text, settings) {
+  const { baseUrl, apiKey, model } = settings;
+
+  if (!apiKey) {
+    throw new Error('API key not configured. Please set it in extension options.');
+  }
+
+  const url = baseUrl.replace(/\/+$/, '') + '/chat/completions';
+  const prompt = buildPrompt(text);
+
+  const response = await fetch(url, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${apiKey}`,
+    },
+    body: JSON.stringify({
+      model,
+      messages: [{ role: 'user', content: prompt }],
+      temperature: 0.3,
+      max_tokens: 4096,
+      stream: true,
+    }),
+  });
+
+  if (!response.ok) {
+    const body = await response.text();
+    throw new Error(`LLM API error (${response.status}): ${body}`);
+  }
+
+  const reader = response.body.getReader();
+  const decoder = new TextDecoder();
+  let buffer = '';
+
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+
+    buffer += decoder.decode(value, { stream: true });
+    const lines = buffer.split('\n');
+    buffer = lines.pop() || '';
+
+    for (const line of lines) {
+      const trimmed = line.trim();
+      if (!trimmed.startsWith('data: ')) continue;
+
+      const data = trimmed.slice(6);
+      if (data === '[DONE]') return;
+
+      try {
+        const parsed = JSON.parse(data);
+        const content = parsed.choices?.[0]?.delta?.content;
+        if (content) {
+          yield content;
+        }
+      } catch {
+        // Skip unparseable lines
+      }
+    }
+  }
+}
+
+async function doRefineInPage(text) {
+  refinedText = '';
+  showOverlay(text);
+
+  try {
+    const settings = await getSettings();
+    const stream = refineTextStream(text, settings);
+
+    let firstChunk = true;
+    for await (const chunk of stream) {
+      if (firstChunk) {
+        showFirstChunk(chunk);
+        firstChunk = false;
+      } else {
+        appendChunk(chunk);
+      }
+    }
+    refinedText = refinedText || '';
+  } catch (err) {
+    showError(err.message);
+  }
+}
+
+// --- Message handling ---
+
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   switch (message.action) {
     case 'showOverlay':
       refinedText = '';
       showOverlay(message.text);
       break;
-    case 'refineFirstChunk':
-      showFirstChunk(message.text);
+    case 'refineInPage':
+      sendResponse({ received: true });
+      doRefineInPage(message.text);
       break;
-    case 'refineChunk':
-      appendChunk(message.text);
-      break;
-    case 'refineDone':
-      break;
-    case 'refineError':
-      showError(message.error);
-      break;
+    case 'refineForPopup': {
+      const reqId = message.requestId;
+      sendResponse({ received: true });
+      getSettings().then((settings) => {
+        const stream = refineTextStream(message.text, settings);
+        return (async () => {
+          try {
+            let first = true;
+            for await (const chunk of stream) {
+              chrome.runtime.sendMessage({
+                action: 'refineChunk',
+                text: chunk,
+                first: first,
+                requestId: reqId,
+              });
+              first = false;
+            }
+            chrome.runtime.sendMessage({ action: 'refineDone', requestId: reqId });
+          } catch (err) {
+            chrome.runtime.sendMessage({ action: 'refineError', error: err.message, requestId: reqId });
+          }
+        })();
+      }).catch((err) => {
+        chrome.runtime.sendMessage({ action: 'refineError', error: err.message, requestId: reqId });
+      });
+      return true;
+    }
   }
 });
 

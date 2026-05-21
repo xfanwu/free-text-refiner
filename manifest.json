@@ -4,7 +4,7 @@
   "version": "0.1.0",
   "description": "Free text refinement via LLM — select, click, refine.",
   "permissions": ["contextMenus", "storage", "activeTab", "scripting"],
-  "host_permissions": ["https://*/*", "http://*/*"],
+
   "background": {
     "service_worker": "src/background/index.js",
     "type": "module"

@@ -1,6 +1,3 @@
-import { getSettings } from '../shared/storage.js';
-import { refineTextStream } from '../shared/llm.js';
-
 const inputText = document.getElementById('input-text');
 const refineBtn = document.getElementById('refine-btn');
 const errorMsg = document.getElementById('error-msg');
@@ -39,29 +36,49 @@ async function doRefine(text) {
   resultText.textContent = '';
   setLoading(true);
 
-  try {
-    const settings = await getSettings();
-    const stream = refineTextStream(text, settings);
+  const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+  if (!tab?.id) {
+    showError('Cannot access the current tab.');
+    setLoading(false);
+    return;
+  }
 
-    let firstChunk = true;
-    let result = '';
-    for await (const chunk of stream) {
-      result += chunk;
-      resultText.textContent = result;
-      if (firstChunk) {
-        firstChunk = false;
+  const requestId = Date.now().toString() + Math.random().toString(36).slice(2);
+
+  const listener = (msg) => {
+    if (msg.requestId !== requestId) return;
+    switch (msg.action) {
+      case 'refineChunk':
+        lastResult += msg.text;
+        resultText.textContent = lastResult;
+        if (msg.first) {
+          setLoading(false);
+          showResult();
+        }
+        break;
+      case 'refineError':
+        showError(msg.error);
         setLoading(false);
-        showResult();
-      }
+        chrome.runtime.onMessage.removeListener(listener);
+        break;
+      case 'refineDone':
+        chrome.runtime.onMessage.removeListener(listener);
+        break;
     }
-    lastResult = result;
+  };
+  chrome.runtime.onMessage.addListener(listener);
+
+  try {
+    await chrome.tabs.sendMessage(tab.id, {
+      action: 'refineForPopup',
+      text: text,
+      requestId: requestId,
+    });
+    lastResult = '';
+  } catch {
+    showError('Cannot communicate with the page. Try refreshing the page.');
     setLoading(false);
-    if (!result) {
-      showError('No response from LLM.');
-    }
-  } catch (err) {
-    showError(err.message);
-    setLoading(false);
+    chrome.runtime.onMessage.removeListener(listener);
   }
 }
 
