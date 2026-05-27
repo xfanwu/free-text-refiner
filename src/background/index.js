@@ -14,7 +14,7 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
 
   try {
     await chrome.tabs.sendMessage(tab.id, { action: 'refineInPage', text });
-  } catch {
-    // Content script not ready — ignore
+  } catch (err) {
+    console.debug('[TextRefine] Context menu: could not reach content script —', err.message);
   }
 });
