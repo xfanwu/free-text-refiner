@@ -22,6 +22,21 @@ function showError(msg) {
   resultArea.classList.remove('visible');
 }
 
+function pageConnectionError(err, tabUrl) {
+  const msg = err?.message || String(err);
+  if (msg.includes('Receiving end does not exist')) {
+    return 'Extension not loaded on this page. Try refreshing the page.';
+  }
+  if (msg.includes('Cannot access') || msg.includes('cannot be scripted')) {
+    const hint = tabUrl ? ` (${new URL(tabUrl).protocol}// page)` : '';
+    return `This extension cannot run on${hint} restricted browser pages. Open a regular website to use it.`;
+  }
+  if (msg.includes('closed') || msg.includes('No tab')) {
+    return 'The tab was closed or navigated away.';
+  }
+  return `Connection error: ${msg}`;
+}
+
 function hideError() {
   errorMsg.classList.remove('visible');
 }
@@ -75,8 +90,8 @@ async function doRefine(text) {
       requestId: requestId,
     });
     lastResult = '';
-  } catch {
-    showError('Cannot communicate with the page. Try refreshing the page.');
+  } catch (err) {
+    showError(pageConnectionError(err, tab.url));
     setLoading(false);
     chrome.runtime.onMessage.removeListener(listener);
   }
@@ -123,8 +138,8 @@ async function init() {
     } else {
       inputText.focus();
     }
-  } catch {
-    inputText.focus();
+  } catch (err) {
+    showError(pageConnectionError(err, tab.url));
   }
 }
 
